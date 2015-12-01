@@ -7,7 +7,11 @@
 # Author:
 #   nekobato
 
+fs = require('fs')
+path = require('path')
 cp = require('child_process')
+request = require('request')
+process = require('process')
 imagemagick = require('imagemagick')
 
 module.exports = (robot) ->
@@ -21,21 +25,14 @@ module.exports = (robot) ->
       msg.send "全部カタカナじゃないと無理にゃ"
       return
 
-    strings = msg.match[1].split('').map (v) -> "rivefont/#{v}.png"
+    strings = msg.match[1].split('').map (v) -> path.resolve "rivefont/#{v}.png"
     imagemagick.convert strings.concat(['-background', 'white', '+append', 'tmp/out.png']), (err, stdout) ->
 
-      url = "https://upload.gyazo.com/api/upload"
-      access_token = "115aa2a8effc876806189f8628e3c9edef1ef5f4349424ba523f31a5dd101df0"
-
-      command = "curl -i #{url} " +
-        "-F 'access_token=#{access_token}' " +
-        "-F 'imagedata=@tmp/out.png'"
-
-      cp.exec command, (err, stdout) ->
-        return err if err
-        match = /http:\/\/i\.gyazo\.com\/\w+\.png/.exec(stdout)
-        msg.send "#{match[0]}"
-        return
+      robot.emit 'telegram:invoke', 'sendPhoto', {
+        chat_id: msg.message.room
+        photo: fs.createReadStream(path.resolve 'tmp/out.png')
+      }, (err, res) ->
+        console.log err, res
 
   #
   # robot.hear /I like pie/i, (msg) ->

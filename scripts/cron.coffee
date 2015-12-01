@@ -15,7 +15,6 @@ cron = require('cron').CronJob
 monitor_urls = [
   'http://nekobato.net'
   'http://dav.nekobato.net'
-  'http://note.nekobato.net'
   'http://endnanonna.nekobato.net'
 ]
 
